@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getUserCreationsAction } from "@/lib/actions/user";
 import { checkUserPlan } from "@/lib/checkUserPlan";
+import { redis } from "@/lib/redis/redis";
 
 export async function GET() {
 
@@ -19,14 +20,30 @@ export async function GET() {
             );
         }
 
+        const cacheKey = `dashboard:${userId}`;
+        const cachedData = await redis.get(cacheKey);
+
+        if (cachedData) {
+            return NextResponse.json({
+                success: true,
+                ...cachedData,
+                cached: true,
+            });
+        }
+
         const user = await checkUserPlan();
 
-        const {creations, plan} = await getUserCreationsAction();
+        const { creations, plan } = await getUserCreationsAction();
+
+        const responseData = { creations, plan: user.plan };
+        await redis.set( cacheKey, responseData, { ex: 60 * 5 });
 
         return NextResponse.json({
             success: true,
-            creations,
-            plan: user.plan,
+            ...responseData,
+            cached: false,
+            // creations,
+            // plan: user.plan,
         });
 
     } catch (error) {

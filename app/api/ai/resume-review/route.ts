@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { checkUserPlan } from "@/lib/checkUserPlan";
 import { resumeReviewAction } from "@/lib/actions/ai";
 import { PDFParse } from 'pdf-parse';
+import { ratelimit } from "@/lib/redis/rate-limit";
 
 export async function POST(req: Request) {
 
@@ -17,6 +18,18 @@ export async function POST(req: Request) {
                     message: "Unauthorized",
                 },
                 { status: 401 }
+            );
+        }
+
+        const { success } = await ratelimit.limit(userId);
+
+        if (!success) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Too many requests. Please try again later.",
+                },
+                { status: 429 }
             );
         }
 
