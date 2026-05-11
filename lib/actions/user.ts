@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
- import { auth } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { checkUserPlan } from "@/lib/checkUserPlan";
 
 //export async function getUserCreationsAction(userId: string) {
@@ -8,7 +8,7 @@ import { checkUserPlan } from "@/lib/checkUserPlan";
     const { userId } = await auth();
     if (!userId) {
     throw new Error("Unauthorized");
-  }
+    }
 
     const creations = await prisma.creations.findMany({
         where: {

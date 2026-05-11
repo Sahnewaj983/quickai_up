@@ -21,7 +21,7 @@ export async function GET() {
 
         const user = await checkUserPlan();
 
-        const creations = await getUserCreationsAction(userId);
+        const {creations, plan} = await getUserCreationsAction();
 
         return NextResponse.json({
             success: true,
