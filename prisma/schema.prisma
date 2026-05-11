@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Creations {
+  id String @id @default(uuid())
+  user_id String
+  prompt String
+  content String
+  type String
+  publish Boolean @default(false)
+  likes String[] @default([])
+  created_at DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
